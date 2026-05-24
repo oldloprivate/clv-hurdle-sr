@@ -1,0 +1,38 @@
+{
+  "title": "A two-stage Hurdle gradient-boosting framework for zero-inflated customer lifetime value prediction",
+  "description": "Reproducible code for the two-stage Hurdle gradient-boosting framework for zero-inflated customer lifetime value (CLV) prediction. Stage 1 estimates purchase probability; Stage 2 predicts conditional spending on an arcsinh-transformed target; the final prediction applies Duan's smearing factor. Reproduces all tables and figures in the paper and its Supplementary Information using the UCI Online Retail II dataset.",
+  "upload_type": "software",
+  "license": "MIT",
+  "access_right": "open",
+  "keywords": [
+    "customer lifetime value",
+    "Hurdle model",
+    "gradient boosting",
+    "zero-inflated data",
+    "RFM",
+    "SHAP"
+  ],
+  "creators": [
+    {
+      "name": "Lin, Chung-Yi",
+      "affiliation": "National Cheng Kung University",
+      "orcid": "0000-0000-0000-0000"
+    },
+    {
+      "name": "Chen, Yuh-Min",
+      "affiliation": "National Cheng Kung University"
+    },
+    {
+      "name": "Kuo, Chia-Chen",
+      "affiliation": "National Cheng Kung University"
+    },
+    {
+      "name": "Yen, Chun-En",
+      "affiliation": "National Cheng Kung University"
+    },
+    {
+      "name": "Lo, Yu-Yao",
+      "affiliation": "Yuan Ze University"
+    }
+  ]
+}

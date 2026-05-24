@@ -1,0 +1,20 @@
+# Core scientific stack
+pandas>=1.5
+numpy>=1.23
+scipy>=1.10
+matplotlib>=3.6
+
+# Machine-learning models
+scikit-learn>=1.2
+xgboost>=1.7
+lightgbm>=3.3
+catboost>=1.2
+
+# Interpretability
+shap>=0.43
+
+# Probabilistic CLV baseline (BG/NBD + Gamma-Gamma)
+lifetimes>=0.11.3
+
+# TIFF output with LZW compression
+Pillow>=9.0

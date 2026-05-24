@@ -1,0 +1,19 @@
+# Data (do not redistribute the UCI dataset)
+*.csv
+online_retail_II_full.csv
+
+# Generated figures
+*.tiff
+*.pdf
+*.png
+
+# Python
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+.venv/
+venv/
+
+# OS
+.DS_Store
+Thumbs.db
