@@ -1,0 +1,241 @@
+======================================================================
+STEP 0: Data Preprocessing
+======================================================================
+Raw records: 1,067,371
+
+--- Return Transparency Report ---
+Positive transactions: 805,620 (97.7%)
+Return records:        18,744 (2.3%)
+
+--- Deduplication (FIX A) ---
+Dedup keys: ['InvoiceNo', 'StockCode', 'CustomerID', 'InvoiceDate', 'Quantity', 'Price']
+Rows: 824,364 -> 797,883  (removed 26,481)
+
+Feature period: 2009-12-01 ~ 2010-11-09 (~11 months)
+Target period:  2010-11-09 ~ 2010-12-23 (44 days, Q4)
+
+======================================================================
+STEP 1: Feature Engineering
+======================================================================
+
+--- Target Distribution (Paper: 4,026 / 62.5% / 59) ---
+Positive (net spending > 0): 1,448 (35.97%)
+Zero (no spending):          2,519 (62.6%)
+Negative (net returns):      59 (1.47%)
+Total customers:             4,026
+
+arcsinh range: [-8.68, 11.48]
+Purchase rate: 35.97%
+
+======================================================================
+STEP 1.5: Descriptive Statistics (Supplementary Figs S1-S4)
+======================================================================
+Supplementary Fig S1 saved
+Supplementary Fig S2 saved
+Supplementary Fig S3 saved
+Supplementary Fig S4 saved
+
+======================================================================
+STEP 2: Architecture Comparison (arcsinh, 30 seeds)
+======================================================================
+  Seed 0/30...
+  Seed 10/30...
+  Seed 20/30...
+
+--- TABLE I: Architecture Comparison ---
+                                R2               MAE                RMSE         
+                              mean     std      mean      std       mean      std
+Architecture   Model                                                             
+Single-MSE     CatBoost     0.3164  0.0151  285.6969   1.9579  1001.0423  11.0251
+               LightGBM     0.2589  0.0312  304.9245   5.8007  1042.1827  21.7046
+               XGBoost      0.3362  0.0150  292.1160   2.4999   986.4243  11.0954
+Single-Tweedie LGB-Tweedie -0.0731  0.0441  333.3988  11.2062  1254.0385  25.6874
+               XGB-Tweedie  0.1581  0.0567  330.8427   5.1870  1110.4210  37.0141
+Two-stage      CatBoost     0.4751  0.0106  291.0917   1.7467   877.2213   8.8323
+               LightGBM     0.4149  0.0185  307.5303   1.1924   926.1162  14.5973
+               XGBoost      0.3890  0.0312  302.4803   3.8795   946.1729  23.9813
+
+======================================================================
+STEP 3: 5×2 CV Paired t-test + Sign Test
+======================================================================
+
+Algorithm      ΔR² Mean   ΔR² SD       t            p_t    k/n     p_sign
+------------------------------------------------------------------------
+XGBoost          +0.104    0.100    3.28     9.60e-03** 8/ 10    0.055  
+LightGBM         +0.154    0.145    3.36     8.44e-03** 10/ 10    0.001***
+CatBoost         +0.094    0.058    5.15     6.05e-04*** 10/ 10    0.001***
+
+--- TABLE III: Two-stage vs Tweedie ---
+Comparison                         ΔR² Mean        t              p
+--------------------------------------------------------------------
+Two-XGBoost vs XGB-Tweedie        +0.231    22.07       1.12e-19
+Two-LightGBM vs LGB-Tweedie        +0.488    57.23       2.22e-31
+
+======================================================================
+STEP 4: BG/NBD + Gamma-Gamma Baseline
+======================================================================
+
+--- TABLE IV: Cross-model Comparison ---
+Model                                R²        MAE         RMSE
+----------------------------------------------------------------
+BG/NBD + Gamma-Gamma              0.475     323.66      1021.73
+Single-MSE XGBoost                0.336     292.12       986.42
+Single-MSE LightGBM               0.259     304.92      1042.18
+Single-MSE CatBoost               0.316     285.70      1001.04
+XGB-Tweedie                       0.158     330.84      1110.42
+LGB-Tweedie                      -0.073     333.40      1254.04
+Two-stage XGBoost                 0.389     302.48       946.17
+Two-stage LightGBM                0.415     307.53       926.12
+Two-stage CatBoost                0.475     291.09       877.22
+
+======================================================================
+STEP 5: Top 20% High-Value Identification
+======================================================================
+Threshold (80th pctl): £363.75
+
+--- TABLE V ---
+                        Precision  Recall     F1
+Arch       Model                                
+Single-MSE CatBoost         0.810   0.192  0.311
+           LightGBM         0.788   0.202  0.321
+           XGBoost          0.790   0.177  0.290
+Tweedie    LGB-Tweedie      0.603   0.463  0.524
+           XGB-Tweedie      0.614   0.480  0.539
+Two-stage  CatBoost         0.656   0.411  0.505
+           LightGBM         0.607   0.419  0.496
+           XGBoost          0.638   0.403  0.494
+
+======================================================================
+STEP 5.5: Stage 1 Occurrence Classifier Diagnostics (30 seeds)
+======================================================================
+
+--- TABLE VI: Stage 1 Standalone Diagnostics (M +/- SD, 30 seeds) ---
+  Empirical positive rate : 0.3598
+  ROC-AUC                 : 0.7376 +/- 0.0014
+  Average precision       : 0.6743 +/- 0.0022  (baseline = pos rate 0.3598)
+  Brier score             : 0.1848 +/- 0.0004  (random baseline ~ 0.2303)
+  Calibration slope       : 0.9309 +/- 0.0098  (1.0 = perfect; SD is seed-to-seed)
+Fig 3 (main) reliability diagram saved
+
+======================================================================
+STEP 6: OOT (Q4 Aligned)
+======================================================================
+OOT: 4,067 customers, purchase rate: 34.28%
+  OOT seed 0/30...
+  OOT seed 10/30...
+  OOT seed 20/30...
+
+--- TABLE VI ---
+                        R2               MAE              RMSE         
+                      mean     std      mean     std      mean      std
+Arch      Model                                                        
+Single    CatBoost  0.3724  0.0122  219.8936  1.1455  921.9549   8.9684
+          LightGBM  0.3476  0.0334  240.8599  2.1621  939.7710  24.0810
+          XGBoost   0.3863  0.0291  220.3539  1.6330  911.5125  21.4476
+Two-stage CatBoost  0.4746  0.0093  242.0324  0.9730  843.5255   7.4738
+          LightGBM  0.4332  0.0074  254.0209  0.9645  876.1934   5.7200
+          XGBoost   0.4457  0.0145  246.7397  0.8656  866.4126  11.3195
+
+======================================================================
+STEP 7: Extended Features (RFM+3)
+======================================================================
+  Ext seed 0/30...
+  Ext seed 10/30...
+  Ext seed 20/30...
+
+--- TABLE VII ---
+                        R2               MAE               RMSE         
+                      mean     std      mean     std       mean      std
+Arch      Model                                                         
+Single    CatBoost  0.2207  0.0350  294.7539  5.7518  1068.6264  24.0086
+          LightGBM  0.0691  0.0821  320.0638  9.3749  1167.1821  51.0750
+          XGBoost   0.2369  0.0576  293.3765  6.3864  1057.0065  40.0016
+Two-stage CatBoost  0.4013  0.0130  293.1732  2.4485   936.8222  10.1133
+          LightGBM  0.2608  0.0205  315.9546  2.4566  1040.9702  14.3559
+          XGBoost   0.3770  0.0217  292.5840  3.5982   955.5736  16.5754
+
+RFM Two-stage XGB: R²=0.3890
+Ext Two-stage XGB: R²=0.3770
+ΔR² = -0.0120
+
+======================================================================
+STEP 8: P×E Segmentation
+======================================================================
+(Stage 2 smearing factor S = -0.0018)
+
+--- TABLE VIII ---
+                          N Actual_Mean P_Mean E_Mean Purchase_Rate
+segment                                                            
+Active, High-Value      227        £927   0.65  £1056           64%
+Active, Moderate        153        £123   0.42   £267           34%
+Dormant, High-E (Risk)  119        £219   0.20   £516           25%
+Low-P, Low-E            307         £57   0.19   £249           20%
+
+--- TABLE X: P-threshold Sensitivity (Dormant, High-E segment) ---
+ P_thr      N  NonZeroRate  MeanActual£     MeanE£
+  0.20     55         27%          226        502
+  0.25     83         24%          261        528
+  0.30    119         25%          219        516
+  0.35    136         26%          230        519
+  0.40    158         28%          252        519
+  0.45    172         30%          255        520
+  0.50    186         30%          253        536
+
+--- TABLE XI: Profit-Curve Sensitivity (6 scenarios) ---
+Scenario                                   OptP  NActed  NetProfit£
+Baseline (£20/£200/30%)                    0.37     292        4780
+Low-cost email (£5/£200/30%)               0.01     806       13370
+High-cost personalised (£50/£200/30%)      0.77      73         310
+High-value VIP (£20/£500/30%)              0.01     806       27380
+Low save-rate (£20/£200/10%)               none       0           0
+High save-rate (£20/£200/50%)              0.24     502       13660
+
+======================================================================
+STEP 9: SHAP Analysis
+======================================================================
+
+--- SHAP Global Importance ---
+Feature    Stage 1    Stage 2
+  R        0.3468     0.0760
+  F        0.6708     0.1472
+  M        0.2055     0.5319
+
+--- Interaction Matrix (Stage 2, XGBoost) ---
+        R       F       M
+R  0.1083  0.0231  0.0376
+F  0.0231  0.1731  0.0444
+M  0.0376  0.0444  0.5595
+
+--- Main vs Interaction ---
+  R: Main=0.1083 (64%), Interaction=0.0607 (36%)
+  F: Main=0.1731 (72%), Interaction=0.0675 (28%)
+  M: Main=0.5595 (87%), Interaction=0.0821 (13%)
+
+  Paper cross-check: F×M=0.0444, M×R=0.0376, F×R=0.0231
+Fig 1 (main) + Supplementary Fig S5 saved
+Fig 2 (main) + Supplementary Fig S6 saved
+Supplementary Fig S7 saved
+Extra (not in paper): main-vs-interaction saved
+Supplementary Fig S8 saved
+Extra (not in paper): pairwise saved
+Extra (not in paper): heatmap saved
+Supplementary Fig S9 saved
+Supplementary Fig S10 saved
+
+--- Waterfall Details (Paper: #192, #119, #389) ---
+  High (#192): R=1, F=177, M=£137581.12, f(x)=10.047, SHAP=[+0.070, +1.197, +1.998]
+  Med (#380): R=116, F=2, M=£990.00, f(x)=6.503, SHAP=[-0.175, +0.045, -0.149]
+  Low (#389): R=210, F=2, M=£24.05, f(x)=4.688, SHAP=[-0.365, -0.147, -1.582]
+Extra (not in paper): PDP saved
+
+======================================================================
+COMPLETE EXPERIMENT SUMMARY
+======================================================================
+
+1. Dataset: 4,026 customers, 62.6% zero, 59 negative → arcsinh
+2. Best: Two-stage CatBoost R²=0.475
+3. Baselines: Single-MSE XGB=0.336, XGB-Tweedie=0.158, BG/NBD=0.475
+4. 5×2 CV: all p_t < 0.05, sign test p_sign computed
+5. Figures: main fig1-fig3 + Supplementary figS1-figS10 (tiff, 600 dpi, SR-compliant)
+
+===== PIPELINE COMPLETE =====

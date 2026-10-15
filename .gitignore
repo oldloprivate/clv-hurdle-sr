@@ -3,9 +3,9 @@
 online_retail_II_full.csv
 
 # Generated figures
-*.tiff
-*.pdf
-*.png
+# *.tiff
+# *.pdf
+# *.png
 
 # Python
 __pycache__/
