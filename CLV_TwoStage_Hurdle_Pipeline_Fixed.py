@@ -9,7 +9,7 @@
 #   [Fix 4] Code2 issues resolved (log1p→arcsinh, +Tweedie, +P×E, etc.)
 # ============================================================
 
-!pip install -q catboost lightgbm xgboost shap lifetimes
+# !pip install -q catboost lightgbm xgboost shap lifetimes
 
 import pandas as pd
 import numpy as np
@@ -55,9 +55,9 @@ SR_SINGLE_COL = 89 * MM     # ~3.50 in
 SR_DOUBLE_COL = 183 * MM    # ~7.20 in
 
 # --- Google Colab ---
-from google.colab import drive
-drive.mount('/content/drive')
-DATA_PATH = "/content/drive/MyDrive/online_retail_II_full.csv"
+# from google.colab import drive
+# drive.mount('/content/drive')
+DATA_PATH = "C:\\Users\\Public\\repos\\clv-cold-start\\datasets\\online_retail_ii\\online_retail_II_full.csv"
 
 # Output format: "tiff" for SR production (LZW-compressed), "pdf"/"png" otherwise.
 OUT_FMT = "tiff"
